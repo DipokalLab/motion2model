@@ -16,8 +16,8 @@
   <body>
     <h1>실시간 포즈를 3d 캐릭터로</h1>
 
-    <button class="btn btn-blue-fill" onclick="startCamera()">startCamera()</button>
-    <button class="btn btn-red-fill" onclick="stopCamera()">stopCamera()</button>
+    <button class="btn btn-blue-fill" id="startCamera">startCamera()</button>
+    <button class="btn btn-red-fill" id="stopCamera">stopCamera()</button>
     <hr>
 
     <canvas id="canvas" width="200" height="200"></canvas>
@@ -36,70 +36,17 @@
     <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 
     <script src="https://dds.devent.kr/dist/main.js"></script>
-    <script src="/script.js"></script>
+    <script type="importmap">
+      {
+          "imports": {
+              "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"
+          }
+      }
+  </script>
+
+    <script type="module" src="/script.js"></script>
+    <script type="module" src="/model.js"></script>
 
       
-      <script type="module">
-            
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize( window.innerWidth, window.innerHeight );
-        document.querySelector("#model").appendChild( renderer.domElement );
-
-
-        const directionalLight = new THREE.DirectionalLight(0x00fffc, 10);
-        directionalLight.position.set(10, 10.25, 10);
-        scene.add(directionalLight);
-
-        const geometry = new THREE.BoxGeometry( 1, 1, 1 );
-        const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-        const cube = new THREE.Mesh( geometry, material );
-        scene.add( cube );
-
-        camera.position.z = 5;
-
-        const loader = new THREE.GLTFLoader();
-
-        // Load a glTF resource
-        loader.load('/model/gltf/GL.glb', ( gltf ) => {
-
-            let model = gltf.scene
-            let glbobject = {}
-            scene.add( model );
-
-
-
-            model.traverse( function ( object ) {
-                if (object.type == 'Bone') {
-                    glbobject[object.name] = object
-
-                }
-						if ( object.isMesh ) object.castShadow = true;
-			});
-
-            //glbobject.mixamorigHead.position.x = 10
-
-            var box = new THREE.Box3().setFromObject( model );
-            model.position.set(0, -box.getSize().y/2 +0.5, 0);
-            
-            let helper = new THREE.SkeletonHelper( model );
-            helper.material.linewidth = 5;
-            helper.visible = true;
-            scene.add(helper);
-
-
-        });
-
-        function animate() {
-            requestAnimationFrame( animate );
-            cube.rotation.x += 0.1
-            renderer.render( scene, camera );
-        }
-        animate();
-      
-      </script>
-
 </body>
 </html>

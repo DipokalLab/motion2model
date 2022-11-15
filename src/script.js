@@ -1,3 +1,5 @@
+import { reallocationPose } from './model.js'
+
 const videoWidth = 200;
 const videoHeight = 200;
 
@@ -42,6 +44,8 @@ const guiState = {
     net: null,
     camera: undefined
 };
+
+
 
 const isMobile = async () => {
     let check = false;
@@ -153,11 +157,24 @@ const drawRectToCanvas = async (keypoints) => {
 const calculatePose = async () => {
     const video = await loadVideo()
     const pose = await getPoseFromVideo(video)
+
+    console.log(pose)
     guiState.camera = video
     
     drawRectToCanvas(pose.keypoints)
     if (guiState.output.showVideo) {
         requestAnimationFrame(calculatePose);
+
+        const parsePoses = {
+            "head": pose.keypoints[0].position,
+            "leftShoulder": pose.keypoints[5].position,
+            "rightShoulder": pose.keypoints[6].position,
+            "leftElbow": pose.keypoints[7].position,
+            "rightElbow": pose.keypoints[8].position,
+            "leftWrist": pose.keypoints[9].position,
+            "rightWrist": pose.keypoints[10].position
+        }
+        reallocationPose(parsePoses)
     }
     
 }
@@ -165,3 +182,7 @@ const calculatePose = async () => {
 
 
 calculatePose()
+
+
+document.getElementById("startCamera").addEventListener("click", startCamera);
+document.getElementById("stopCamera").addEventListener("click", stopCamera);
