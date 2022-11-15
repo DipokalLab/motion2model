@@ -1,4 +1,4 @@
-
+import { OrbitControls } from "./jsm/OrbitControls.js";
 
 const scene = new THREE.Scene();
 const clock = new THREE.Clock();
@@ -36,6 +36,8 @@ scene.add(mesh);
 
 
 camera.position.set( 0, 2, 3 );
+
+const controls = new OrbitControls( camera, renderer.domElement );
 
 
 const loader = new THREE.GLTFLoader();
@@ -95,7 +97,10 @@ function reallocationPose(poses) {
 
 function animate() {
     requestAnimationFrame( animate );
+    controls.update();
+
     renderer.render( scene, camera );
+
 }
 animate();
 
