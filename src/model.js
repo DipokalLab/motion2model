@@ -1,81 +1,97 @@
 import { OrbitControls } from "./jsm/OrbitControls.js";
 
-const scene = new THREE.Scene();
-const clock = new THREE.Clock();
 
-
-scene.background = new THREE.Color( 0xa0a0a0 );
-scene.fog = new THREE.Fog( 0xa0a0a0, 10, 50 );
-
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-
-const renderer = new THREE.WebGLRenderer();
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.querySelector("#model").appendChild( renderer.domElement );
-
-
-const dirLight = new THREE.DirectionalLight( 0xf7e5df );
-dirLight.position.set( 3, 1000, 2500 );
-dirLight.castShadow = true;
-dirLight.shadow.camera.top = 2;
-dirLight.shadow.camera.bottom = - 2;
-dirLight.shadow.camera.left = - 2;
-dirLight.shadow.camera.right = 2;
-dirLight.shadow.camera.near = 0.06;
-dirLight.shadow.camera.far = 4000;
-scene.add(dirLight);
-
-const hemiLight = new THREE.HemisphereLight( 0x707070, 0x444444 );
-hemiLight.position.set( 0, 120, 0 );
-scene.add(hemiLight);
-
-const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100 ),new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: true} ) );
-mesh.rotation.x = - Math.PI / 2;
-mesh.receiveShadow = true;
-scene.add(mesh);
-
-
-camera.position.set( 0, 2, 3 );
-
-const controls = new OrbitControls( camera, renderer.domElement );
-
-
-const loader = new THREE.GLTFLoader();
 let glbposes = {}
 let model;
+let state = {
+    scene: undefined,
+    camera: undefined,
+    renderer: undefined,
+    controls: undefined,
+    model: undefined
+}
 
-// Load a glTF resource
+const init = () => {
+    state.scene = new THREE.Scene();
+    state.scene.background = new THREE.Color( 0xa0a0a0 );
+    state.scene.fog = new THREE.Fog( 0xa0a0a0, 10, 50 );
+
+    const clock = new THREE.Clock();
+
+
+    
+    state.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    state.camera.position.set( 0, 2, 3 );
+
+    state.renderer = new THREE.WebGLRenderer();
+    state.renderer.setSize( window.innerWidth, window.innerHeight );
+    document.querySelector("#model").appendChild( state.renderer.domElement );
+    
+    const dirLight = new THREE.DirectionalLight( 0xf7e5df );
+    dirLight.position.set( 3, 1000, 2500 );
+    dirLight.castShadow = true;
+    dirLight.shadow.camera.top = 2;
+    dirLight.shadow.camera.bottom = - 2;
+    dirLight.shadow.camera.left = - 2;
+    dirLight.shadow.camera.right = 2;
+    dirLight.shadow.camera.near = 0.06;
+    dirLight.shadow.camera.far = 4000;
+    state.scene.add(dirLight);
+    
+    const hemiLight = new THREE.HemisphereLight( 0x707070, 0x444444 );
+    hemiLight.position.set( 0, 120, 0 );
+    state.scene.add(hemiLight);
+    
+    const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100 ),new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: true} ) );
+    mesh.rotation.x = - Math.PI / 2;
+    mesh.receiveShadow = true;
+    state.scene.add(mesh);
+    
+    
+    state.controls = new OrbitControls( state.camera, state.renderer.domElement );
+    function animate() {
+        requestAnimationFrame( animate );
+        state.controls.update();
+    
+        state.renderer.render( state.scene, state.camera );
+    }
+    animate();
+    
+}
+
+
+init()
+
+const loader = new THREE.GLTFLoader();
 loader.load('/model/gltf/GL.glb', ( gltf ) => {
+    state.model = gltf.scene
+    state.model.position.set(50,0,0);
+    state.scene.add( state.model );
 
-    model = gltf.scene
-    model.position.set(50,0,0);
-    scene.add( model );
-
-
-
-    model.traverse( function ( object ) {
+    state.model.traverse( function ( object ) {
         if (object.type == 'Bone') {
             glbposes[object.name] = object
-
         }
         if ( object.isMesh ) object.castShadow = true;
     });
 
-    //glbobject.mixamorigHead.position.x = 10
-
-    var box = new THREE.Box3().setFromObject( model );
-    model.position.set(0, -box.getSize().y/2 +0.5, 0);
+    let box = new THREE.Box3().setFromObject( state.model );
+    state.model.position.set(0, -box.getSize().y/2 +0.5, 0);
     
-    let helper = new THREE.SkeletonHelper( model );
+    let helper = new THREE.SkeletonHelper( state.model );
     helper.material.linewidth = 5;
     helper.visible = true;
-    scene.add(helper);
+    state.scene.add(helper);
 });
 
-function reallocationPose(poses) {
-    console.log(glbposes)
-    model.position.x = (poses.head.x -100)/100
+
+
+
+
+const reallocationPose = (poses) => {
+    state.model.position.x = (poses.head.x -100)/100
     //glbposes.mixamorigHead.position.y = -poses.head.y
+    console.log(glbposes)
 
     glbposes.mixamorigLeftShoulder.position.x = (poses.leftShoulder.x - 100)
     glbposes.mixamorigLeftShoulder.position.y = -poses.leftShoulder.y + 200
@@ -84,24 +100,20 @@ function reallocationPose(poses) {
     glbposes.mixamorigRightShoulder.position.y = -poses.rightShoulder.y + 200
 
     glbposes.mixamorigLeftHand.position.z = poses.leftWrist.y - 200
-    //glbposes.mixamorigLeftHand.position.y = poses.leftWrist.x
+    glbposes.mixamorigLeftHand.position.y = poses.leftWrist.x - 200
 
     glbposes.mixamorigRightHand.position.z = poses.rightWrist.y - 200
-    //glbposes.mixamorigRightHand.position.y = -poses.rightWrist.x
+    glbposes.mixamorigRightHand.position.y = -poses.rightWrist.x + 50
 
 
-    
+    glbposes.mixamorigLeftForeArm.position.z = poses.leftElbow.y - 150
+    glbposes.mixamorigLeftForeArm.position.y = poses.leftElbow.x - 150
 
+    glbposes.mixamorigRightForeArm.position.z = poses.rightElbow.y - 150
+    glbposes.mixamorigRightForeArm.position.y = -poses.rightElbow.x + 50
 }
 
 
-function animate() {
-    requestAnimationFrame( animate );
-    controls.update();
 
-    renderer.render( scene, camera );
-
-}
-animate();
 
 export { reallocationPose }
