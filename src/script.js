@@ -45,6 +45,35 @@ const guiState = {
     camera: undefined
 };
 
+const videoElement = document.getElementsByClassName('input_video')[0];
+const canvasElement = document.getElementsByClassName('output_canvas')[0];
+const canvasCtx = canvasElement.getContext('2d');
+const landmarkContainer = document.getElementsByClassName('landmark-grid-container')[0];
+const grid = new LandmarkGrid(landmarkContainer);
+
+
+const pose = new Pose({locateFile: (file) => {
+  return `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`;
+}});
+
+const camera = new Camera(videoElement, {
+    onFrame: async () => {
+        await pose.send({image: videoElement});
+    },
+    width: 300,
+    height: 300
+});
+
+pose.setOptions({
+  modelComplexity: 1,
+  smoothLandmarks: true,
+  enableSegmentation: true,
+  smoothSegmentation: true,
+  minDetectionConfidence: 0.5,
+  minTrackingConfidence: 0.5
+});
+
+
 
 
 const isMobile = async () => {
@@ -153,6 +182,43 @@ const drawRectToCanvas = async (keypoints) => {
 
 
 
+const onResults = (results) => {
+    if (!results.poseLandmarks) {
+      grid.updateLandmarks([]);
+      return;
+    }
+  
+    canvasCtx.save();
+    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+    canvasCtx.drawImage(results.segmentationMask, 0, 0, canvasElement.width, canvasElement.height);
+  
+    canvasCtx.globalCompositeOperation = 'source-in';
+    canvasCtx.fillStyle = '#00FF00';
+    canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
+  
+    canvasCtx.globalCompositeOperation = 'destination-atop';
+    canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+  
+    canvasCtx.globalCompositeOperation = 'source-over';
+    drawConnectors(canvasCtx, results.poseLandmarks, POSE_CONNECTIONS, {color: '#00FF00', lineWidth: 4});
+    drawLandmarks(canvasCtx, results.poseLandmarks, {color: '#FF0000', lineWidth: 2});
+    canvasCtx.restore();
+  
+    grid.updateLandmarks(results.poseWorldLandmarks);
+
+    const parsePoses = {
+        "head": results.poseWorldLandmarks[0],
+        "leftShoulder": results.poseWorldLandmarks[11],
+        "rightShoulder": results.poseWorldLandmarks[12],
+        "leftElbow": results.poseWorldLandmarks[13],
+        "rightElbow": results.poseWorldLandmarks[14],
+        "leftWrist": results.poseWorldLandmarks[15],
+        "rightWrist": results.poseWorldLandmarks[16]
+    }
+    reallocationPose(parsePoses)
+  
+    console.log(results.poseWorldLandmarks[19].x, results.poseWorldLandmarks[20].x)
+}
 
 const calculatePose = async () => {
     const video = await loadVideo()
@@ -181,7 +247,10 @@ const calculatePose = async () => {
 
 
 
-calculatePose()
+//calculatePose()
+
+pose.onResults(onResults);
+camera.start();
 
 
 document.getElementById("startCamera").addEventListener("click", startCamera);
