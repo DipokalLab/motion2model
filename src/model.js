@@ -15,10 +15,6 @@ const init = () => {
     state.scene = new THREE.Scene();
     state.scene.background = new THREE.Color( 0xa0a0a0 );
     state.scene.fog = new THREE.Fog( 0xa0a0a0, 10, 50 );
-
-    const clock = new THREE.Clock();
-
-
     
     state.camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
     state.camera.position.set( 0, 2, 3 );
@@ -85,43 +81,27 @@ loader.load('/model/gltf/GL.glb', ( gltf ) => {
 });
 
 
-const findAngle = (a,b,c) => {
-    let ab = Math.sqrt(Math.pow(b.x-a.x,2)+ Math.pow(b.y-a.y,2));    
-    let bc = Math.sqrt(Math.pow(b.x-c.x,2)+ Math.pow(b.y-c.y,2)); 
-    let ac = Math.sqrt(Math.pow(c.x-a.x,2)+ Math.pow(c.y-a.y,2));
-    return Math.acos((bc*bc+ab*ab-ac*ac)/(2*bc*ab));
+
+const findAngle2d = (a,b) => {
+    let defX =  a.x - b.x;
+    let defY =  a.y - b.y;
+    let angle = Math.atan2(defY, defX);
+    
+    return angle;
 }
+
 
 
 const reallocationPose = (poses) => {
     state.model.position.x = (poses.head.x -100)/100
     //glbposes.mixamorigHead.position.y = -poses.head.y
-    console.log( findAngle(poses.rightWrist, poses.rightElbow, poses.rightShoulder))
 
-    glbposes.mixamorigRightShoulder.rotation.y = findAngle(poses.leftShoulder, poses.rightShoulder, poses.rightElbow)+ Math.PI
-    glbposes.mixamorigLeftShoulder.rotation.y = - findAngle(poses.rightShoulder, poses.leftShoulder, poses.leftElbow)+ Math.PI
+    glbposes.mixamorigRightShoulder.rotation.y = - findAngle2d(poses.rightShoulder, poses.rightElbow)
+    glbposes.mixamorigLeftShoulder.rotation.y = - findAngle2d(poses.leftShoulder, poses.leftElbow) + Math.PI
 
-    glbposes.mixamorigRightForeArm.rotation.x = findAngle(poses.rightWrist, poses.rightElbow, poses.rightShoulder) + (Math.PI)
-    glbposes.mixamorigLeftForeArm.rotation.x = findAngle(poses.leftWrist, poses.leftElbow, poses.leftShoulder) + (Math.PI)
+    glbposes.mixamorigRightForeArm.rotation.x = - (findAngle2d(poses.rightWrist, poses.rightElbow) + (Math.PI)) + findAngle2d(poses.rightShoulder, poses.rightElbow)
+    glbposes.mixamorigLeftForeArm.rotation.x = (findAngle2d(poses.leftWrist, poses.leftElbow) + (Math.PI)) - (findAngle2d(poses.leftShoulder, poses.leftElbow))
 
-    // glbposes.mixamorigLeftShoulder.position.x = (poses.leftShoulder.x - 100)
-    // glbposes.mixamorigLeftShoulder.position.y = -poses.leftShoulder.y + 200
-
-    // glbposes.mixamorigRightShoulder.position.x = (poses.rightShoulder.x - 100 )
-    // glbposes.mixamorigRightShoulder.position.y = -poses.rightShoulder.y + 200
-
-    // glbposes.mixamorigLeftHand.position.z = poses.leftWrist.y - 200
-    // glbposes.mixamorigLeftHand.position.y = poses.leftWrist.x - 200
-
-    // glbposes.mixamorigRightHand.position.z = poses.rightWrist.y - 200
-    // glbposes.mixamorigRightHand.position.y = -poses.rightWrist.x + 50
-
-
-    // glbposes.mixamorigLeftForeArm.position.z = poses.leftElbow.y - 150
-    // glbposes.mixamorigLeftForeArm.position.y = poses.leftElbow.x - 150
-
-    // glbposes.mixamorigRightForeArm.position.z = poses.rightElbow.y - 150
-    // glbposes.mixamorigRightForeArm.position.y = -poses.rightElbow.x + 50
 }
 
 

@@ -12,10 +12,6 @@ const defaultMobileNetMultiplier = 0.75;
 const defaultMobileNetStride = 16;
 const defaultMobileNetInputResolution = 500;
 
-const defaultResNetMultiplier = 1.0;
-const defaultResNetStride = 32;
-const defaultResNetInputResolution = 250;
-
 const guiState = {
     algorithm: 'multi-pose',
     input: {
@@ -60,7 +56,7 @@ const camera = new Camera(videoElement, {
     onFrame: async () => {
         await pose.send({image: videoElement});
     },
-    width: 300,
+    width: 500,
     height: 300
 });
 
@@ -217,7 +213,7 @@ const onResults = (results) => {
     }
     reallocationPose(parsePoses)
   
-    console.log(results.poseWorldLandmarks[19].x, results.poseWorldLandmarks[20].x)
+    //console.log(results.poseWorldLandmarks[19].x, results.poseWorldLandmarks[20].x)
 }
 
 const calculatePose = async () => {
