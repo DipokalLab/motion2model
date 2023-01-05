@@ -2,7 +2,6 @@ import { OrbitControls } from "./jsm/OrbitControls.js";
 
 
 let glbposes = {}
-let model;
 let state = {
     scene: undefined,
     camera: undefined,
@@ -94,13 +93,16 @@ const findAngle2d = (a,b) => {
 
 const reallocationPose = (poses) => {
     state.model.position.x = (poses.head.x -100)/100
-    //glbposes.mixamorigHead.position.y = -poses.head.y
+    console.log(glbposes, poses)
 
     glbposes.mixamorigRightShoulder.rotation.y = - findAngle2d(poses.rightShoulder, poses.rightElbow)
     glbposes.mixamorigLeftShoulder.rotation.y = - findAngle2d(poses.leftShoulder, poses.leftElbow) + Math.PI
 
     glbposes.mixamorigRightForeArm.rotation.x = - (findAngle2d(poses.rightWrist, poses.rightElbow) + (Math.PI)) + findAngle2d(poses.rightShoulder, poses.rightElbow)
     glbposes.mixamorigLeftForeArm.rotation.x = (findAngle2d(poses.leftWrist, poses.leftElbow) + (Math.PI)) - (findAngle2d(poses.leftShoulder, poses.leftElbow))
+
+    glbposes.mixamorigRightUpLeg.rotation.z = - (findAngle2d(poses.rightHip, poses.rightKnee) + (Math.PI / 2) + (Math.PI))
+    glbposes.mixamorigLeftUpLeg.rotation.z = - (findAngle2d(poses.leftHip, poses.leftKnee) + (Math.PI / 2) + (Math.PI))
 
 }
 

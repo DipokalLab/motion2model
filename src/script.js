@@ -209,7 +209,11 @@ const onResults = (results) => {
         "leftElbow": results.poseWorldLandmarks[13],
         "rightElbow": results.poseWorldLandmarks[14],
         "leftWrist": results.poseWorldLandmarks[15],
-        "rightWrist": results.poseWorldLandmarks[16]
+        "rightWrist": results.poseWorldLandmarks[16],
+        "leftHip": results.poseWorldLandmarks[23],
+        "rightHip": results.poseWorldLandmarks[24],
+        "leftKnee": results.poseWorldLandmarks[25],
+        "rightKnee":results.poseWorldLandmarks[26],
     }
     reallocationPose(parsePoses)
   
@@ -234,8 +238,14 @@ const calculatePose = async () => {
             "leftElbow": pose.keypoints[7].position,
             "rightElbow": pose.keypoints[8].position,
             "leftWrist": pose.keypoints[9].position,
-            "rightWrist": pose.keypoints[10].position
+            "rightWrist": pose.keypoints[10].position,
+            "leftHip": pose.keypoints[23].position,
+            "rightHip": pose.keypoints[24].position,
+            "leftKnee": pose.keypoints[25].position,
+            "rightKnee": pose.keypoints[26].position
+
         }
+
         reallocationPose(parsePoses)
     }
     

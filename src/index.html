@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.8.2/css/all.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/rainbow/1.2.0/themes/github.min.css" integrity="sha512-dqCmbGxLwDqQYmI+Dr0LAWG21trYGnqIaw+yuyfmLXTmb8tiZyvOeqQqmJbZWv7UpzUeRV9Zj6QTKMw4eMSiHw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="https://dds.devent.kr/dist/style.css">
+    <link rel="stylesheet" href="style.css">
 
     
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
@@ -20,24 +21,35 @@
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
   </head>
-  <body>
-    <h1>실시간 포즈를 3d 캐릭터로</h1>
+  <body class="overflow-hidden">
 
-    <button class="btn btn-blue-fill" id="startCamera">startCamera()</button>
-    <button class="btn btn-red-fill" id="stopCamera">stopCamera()</button>
-    <hr>
-    <canvas id="canvas" width="500" height="200"></canvas>
-    <video id="video"></video>
 
-    <div class="d-flex flex-row bd-highlight mb-3">
-      <video class="input_video"></video>
-      <canvas class="output_canvas" width="500" height="200"></canvas>
-      <div class="landmark-grid-container d-none"></div>
+
+    <div class="position-absolute" style="width: 20%;">
+      <div class="bg-dark overflow-scroll m-2 h-100 rounded">
+        <h1>실시간 포즈를 3d 캐릭터로</h1>
+
+        <button class="btn btn-blue-fill" id="startCamera">startCamera()</button>
+        <button class="btn btn-red-fill" id="stopCamera">stopCamera()</button>
+        <hr>
+
+    
+        <div class="d-flex flex-row bd-highlight mb-3">
+          <canvas class="output_canvas" ></canvas>
+
+          <canvas id="canvas" width="500" height="200"></canvas>
+          <video id="video"></video>
+          <div class="landmark-grid-container d-none" style="width: 100%;"></div>
+
+        </div>
+      </div>
     </div>
 
+    <div class="position-absolute" style="width: 20%; left: 78%;">
+      <video class="input_video m-2 rounded" width="100%"></video>
 
+    </div>
 
-    <hr>
     <div id="model">
 
     </div>
