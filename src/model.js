@@ -104,6 +104,9 @@ const reallocationPose = (poses) => {
     glbposes.mixamorigRightUpLeg.rotation.z = - (findAngle2d(poses.rightHip, poses.rightKnee) + (Math.PI / 2) + (Math.PI))
     glbposes.mixamorigLeftUpLeg.rotation.z = - (findAngle2d(poses.leftHip, poses.leftKnee) + (Math.PI / 2) + (Math.PI))
 
+    glbposes.mixamorigRightLeg.rotation.z = - (findAngle2d(poses.rightKnee, poses.rightAnkle)) + findAngle2d(poses.rightHip, poses.rightKnee)
+    glbposes.mixamorigLeftLeg.rotation.z = - (findAngle2d(poses.leftKnee, poses.leftAnkle)) + findAngle2d(poses.leftHip, poses.leftKnee)
+
 }
 
 
