@@ -1,0 +1,8 @@
+name: DeployM2M
+on: push
+jobs:
+  build:
+    runs-on: Macbook Pro
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm run start
