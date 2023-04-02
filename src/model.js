@@ -20,6 +20,8 @@ const init = () => {
 
     state.renderer = new THREE.WebGLRenderer();
     state.renderer.setSize( window.innerWidth, window.innerHeight );
+    state.renderer.shadowMap.enabled = true;
+
     document.querySelector("#model").appendChild( state.renderer.domElement );
     
     const dirLight = new THREE.DirectionalLight( 0xf7e5df );
@@ -37,7 +39,7 @@ const init = () => {
     hemiLight.position.set( 0, 120, 0 );
     state.scene.add(hemiLight);
     
-    const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100 ),new THREE.MeshPhongMaterial( { color: 0x999999, depthWrite: true} ) );
+    const mesh = new THREE.Mesh( new THREE.PlaneGeometry( 100, 100 ),new THREE.MeshPhongMaterial( { color: 0xe6e6e6, depthWrite: true} ) );
     mesh.rotation.x = - Math.PI / 2;
     mesh.receiveShadow = true;
     state.scene.add(mesh);
@@ -58,9 +60,11 @@ const init = () => {
 init()
 
 const loader = new THREE.GLTFLoader();
-loader.load('/model/gltf/GL.glb', ( gltf ) => {
+loader.load('/model/gltf/bot.glb', ( gltf ) => {
     state.model = gltf.scene
     state.model.position.set(50,0,0);
+    state.model.receiveShadow = true;
+
     state.scene.add( state.model );
 
     state.model.traverse( function ( object ) {
@@ -89,23 +93,31 @@ const findAngle2d = (a,b) => {
     return angle;
 }
 
+const findAngleX = (a,b) => {
+    let defX =  a.x - b.x;
+    let defY =  a.z - b.z;
+    let angle = Math.atan2(defY, defX);
+    
+    return angle;
+}
 
 
 const reallocationPose = (poses) => {
+    let w = 0.7
     state.model.position.x = (poses.head.x -100)/100
     console.log(glbposes, poses)
 
-    glbposes.mixamorigRightShoulder.rotation.y = - findAngle2d(poses.rightShoulder, poses.rightElbow)
-    glbposes.mixamorigLeftShoulder.rotation.y = - findAngle2d(poses.leftShoulder, poses.leftElbow) + Math.PI
+    glbposes.mixamorigRightArm.rotation.x = poses.rightShoulder.visibility > w ? - findAngle2d(poses.rightShoulder, poses.rightElbow) : glbposes.mixamorigRightArm.rotation.x
+    glbposes.mixamorigLeftArm.rotation.x = poses.leftShoulder.visibility > w ?  findAngle2d(poses.leftShoulder, poses.leftElbow) + Math.PI : glbposes.mixamorigLeftArm.rotation.x
 
-    glbposes.mixamorigRightForeArm.rotation.x = - (findAngle2d(poses.rightWrist, poses.rightElbow) + (Math.PI)) + findAngle2d(poses.rightShoulder, poses.rightElbow)
-    glbposes.mixamorigLeftForeArm.rotation.x = (findAngle2d(poses.leftWrist, poses.leftElbow) + (Math.PI)) - (findAngle2d(poses.leftShoulder, poses.leftElbow))
+    glbposes.mixamorigRightForeArm.rotation.x = poses.rightWrist.visibility > w ? - (findAngle2d(poses.rightWrist, poses.rightElbow) + (Math.PI)) + findAngle2d(poses.rightShoulder, poses.rightElbow) : glbposes.mixamorigRightForeArm.rotation.x 
+    glbposes.mixamorigLeftForeArm.rotation.x = poses.leftWrist.visibility > w ? (findAngle2d(poses.leftWrist, poses.leftElbow) + (Math.PI)) - (findAngle2d(poses.leftShoulder, poses.leftElbow)) : glbposes.mixamorigLeftForeArm.rotation.x
 
-    glbposes.mixamorigRightUpLeg.rotation.z = - (findAngle2d(poses.rightHip, poses.rightKnee) + (Math.PI / 2) + (Math.PI))
-    glbposes.mixamorigLeftUpLeg.rotation.z = - (findAngle2d(poses.leftHip, poses.leftKnee) + (Math.PI / 2) + (Math.PI))
+    glbposes.mixamorigRightUpLeg.rotation.z = poses.rightHip.visibility > w ? - (findAngle2d(poses.rightHip, poses.rightKnee) + (Math.PI / 2) + (Math.PI)) : glbposes.mixamorigRightUpLeg.rotation.z
+    glbposes.mixamorigLeftUpLeg.rotation.z = poses.leftHip.visibility > w ? - (findAngle2d(poses.leftHip, poses.leftKnee) + (Math.PI / 2) + (Math.PI)) : glbposes.mixamorigLeftUpLeg.rotation.z
 
-    glbposes.mixamorigRightLeg.rotation.z = - (findAngle2d(poses.rightKnee, poses.rightAnkle)) + findAngle2d(poses.rightHip, poses.rightKnee)
-    glbposes.mixamorigLeftLeg.rotation.z = - (findAngle2d(poses.leftKnee, poses.leftAnkle)) + findAngle2d(poses.leftHip, poses.leftKnee)
+    glbposes.mixamorigRightLeg.rotation.z = poses.rightKnee.visibility > w ? - (findAngle2d(poses.rightKnee, poses.rightAnkle)) + findAngle2d(poses.rightHip, poses.rightKnee) : glbposes.mixamorigRightLeg.rotation.z
+    glbposes.mixamorigLeftLeg.rotation.z = poses.leftKnee.visibility > w ? - (findAngle2d(poses.leftKnee, poses.leftAnkle)) + findAngle2d(poses.leftHip, poses.leftKnee) : glbposes.mixamorigLeftLeg.rotation.z
 
 }
 
